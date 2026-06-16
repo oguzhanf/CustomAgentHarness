@@ -1,0 +1,24 @@
+{
+  "$schema": "https://aka.ms/agent365-blueprint-schema/v1",
+  "displayName": "ForgedScholarTwo",
+  "description": "AgenticBank policy & compliance scholar. Operates with its own application identity, answers from vetted policy corpus.",
+  "signInAudience": "AzureADMyOrg",
+  "owner": {
+    "userPrincipalName": "admin@example.org"
+  },
+  "sponsor": {
+    "userPrincipalName": "admin@example.org"
+  },
+  "tags": ["AgenticBank", "PolicyAndCompliance", "S2S", "CustomAgentHarness"],
+  "requiredResourceAccess": [
+    {
+      "resourceAppId": "00000003-0000-0000-c000-000000000000",
+      "resourceAccess": [
+        { "id": "df021288-bdef-4463-88db-98f22de89214", "type": "Role" }
+      ]
+    }
+  ],
+  "mcpServers": [
+    { "uniqueName": "harness_kb_agenticbank", "scope": "KB.Search.All", "endpoint": "http://localhost:3981/mcp" }
+  ]
+}

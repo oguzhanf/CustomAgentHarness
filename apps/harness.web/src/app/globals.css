@@ -1,0 +1,195 @@
+@import "tailwindcss";
+
+/* ============================================================
+   CUSTOMAGENTHARNESS — CYBERPUNK 2077 PALETTE
+   Workshop demo: Agent 365 + custom harness for AgenticBank
+   ============================================================ */
+
+:root {
+  /* Brand */
+  --color-neon-orange: #ff8c00;
+  --color-neon-orange-soft: #ffae3d;
+  --color-electric-purple: #b026ff;
+  --color-electric-purple-soft: #cd66ff;
+  --color-cyber-cyan: #00f0ff;
+  --color-cyber-pink: #ff2a6d;
+
+  /* Backgrounds */
+  --color-navy-deep: #05071a;
+  --color-navy: #0a0e27;
+  --color-navy-soft: #131737;
+  --color-navy-card: #181c40;
+  --color-navy-border: #2a2f5a;
+
+  /* Text */
+  --color-ink: #e6e8ff;
+  --color-ink-dim: #9aa1d6;
+  --color-ink-faint: #5a608f;
+
+  /* State */
+  --color-ok: #2dd4bf;
+  --color-warn: #ffd166;
+  --color-block: #ff2a6d;
+}
+
+@theme inline {
+  --color-neon-orange: var(--color-neon-orange);
+  --color-neon-orange-soft: var(--color-neon-orange-soft);
+  --color-electric-purple: var(--color-electric-purple);
+  --color-electric-purple-soft: var(--color-electric-purple-soft);
+  --color-cyber-cyan: var(--color-cyber-cyan);
+  --color-cyber-pink: var(--color-cyber-pink);
+  --color-navy-deep: var(--color-navy-deep);
+  --color-navy: var(--color-navy);
+  --color-navy-soft: var(--color-navy-soft);
+  --color-navy-card: var(--color-navy-card);
+  --color-navy-border: var(--color-navy-border);
+  --color-ink: var(--color-ink);
+  --color-ink-dim: var(--color-ink-dim);
+  --color-ink-faint: var(--color-ink-faint);
+  --color-ok: var(--color-ok);
+  --color-warn: var(--color-warn);
+  --color-block: var(--color-block);
+  --font-sans: var(--font-jetbrains-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+html, body {
+  background: var(--color-navy-deep);
+  color: var(--color-ink);
+  font-family: var(--font-jetbrains-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  font-feature-settings: "calt" 0;
+  letter-spacing: 0.01em;
+}
+
+/* Global cyberpunk grid (scanlines + faint mesh) */
+body {
+  background-image:
+    linear-gradient(to bottom, rgba(176, 38, 255, 0.03) 0%, rgba(0, 0, 0, 0) 60%),
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 140, 0, 0.12), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(176, 38, 255, 0.10), transparent 70%),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.012) 0,
+      rgba(255, 255, 255, 0.012) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+}
+
+/* Utility classes used across the app */
+@layer utilities {
+  .text-glow-orange {
+    text-shadow: 0 0 6px rgba(255, 140, 0, 0.6), 0 0 18px rgba(255, 140, 0, 0.35);
+  }
+  .text-glow-purple {
+    text-shadow: 0 0 6px rgba(176, 38, 255, 0.6), 0 0 18px rgba(176, 38, 255, 0.35);
+  }
+  .text-glow-cyan {
+    text-shadow: 0 0 6px rgba(0, 240, 255, 0.7), 0 0 18px rgba(0, 240, 255, 0.35);
+  }
+  .border-glow-orange {
+    box-shadow: 0 0 0 1px rgba(255, 140, 0, 0.6), 0 0 18px rgba(255, 140, 0, 0.25);
+  }
+  .border-glow-purple {
+    box-shadow: 0 0 0 1px rgba(176, 38, 255, 0.6), 0 0 18px rgba(176, 38, 255, 0.25);
+  }
+  .panel {
+    background: linear-gradient(135deg, rgba(24, 28, 64, 0.85), rgba(10, 14, 39, 0.85));
+    border: 1px solid var(--color-navy-border);
+    backdrop-filter: blur(6px);
+  }
+  .panel-glow {
+    background: linear-gradient(135deg, rgba(24, 28, 64, 0.85), rgba(10, 14, 39, 0.85));
+    border: 1px solid var(--color-navy-border);
+    box-shadow: 0 0 0 1px rgba(176, 38, 255, 0.2), 0 0 30px rgba(255, 140, 0, 0.08);
+    backdrop-filter: blur(6px);
+  }
+  .scanline::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255, 140, 0, 0.025) 0,
+      rgba(255, 140, 0, 0.025) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.18rem 0.55rem;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border: 1px solid var(--color-navy-border);
+    border-radius: 0.25rem;
+    background: rgba(10, 14, 39, 0.6);
+    color: var(--color-ink-dim);
+  }
+  .chip-orange { color: var(--color-neon-orange); border-color: rgba(255, 140, 0, 0.5); background: rgba(255, 140, 0, 0.08); }
+  .chip-purple { color: var(--color-electric-purple-soft); border-color: rgba(176, 38, 255, 0.5); background: rgba(176, 38, 255, 0.08); }
+  .chip-cyan   { color: var(--color-cyber-cyan); border-color: rgba(0, 240, 255, 0.5); background: rgba(0, 240, 255, 0.06); }
+  .chip-ok     { color: var(--color-ok); border-color: rgba(45, 212, 191, 0.5); background: rgba(45, 212, 191, 0.08); }
+  .chip-block  { color: var(--color-block); border-color: rgba(255, 42, 109, 0.5); background: rgba(255, 42, 109, 0.08); }
+  .chip-warn   { color: var(--color-warn); border-color: rgba(255, 209, 102, 0.5); background: rgba(255, 209, 102, 0.08); }
+}
+
+/* Animated underline for nav items */
+.nav-link {
+  position: relative;
+  transition: color 0.15s ease;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -4px;
+  height: 1px;
+  background: linear-gradient(to right, var(--color-neon-orange), var(--color-electric-purple));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s ease;
+}
+.nav-link.active::after, .nav-link:hover::after {
+  transform: scaleX(1);
+}
+.nav-link.active, .nav-link:hover {
+  color: var(--color-ink);
+}
+
+/* Cyberpunk pulse */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 1.0; }
+}
+.pulse {
+  animation: pulseGlow 1.6s ease-in-out infinite;
+}
+
+/* HarnessMark center-node breathing pulse */
+@keyframes harnessMarkBreath {
+  0%, 100% { transform: scale(1);    opacity: 0.85; }
+  50%      { transform: scale(1.18); opacity: 1.0; }
+}
+.harness-mark-pulse {
+  transform-origin: 32px 32px;
+  transform-box: fill-box;
+  animation: harnessMarkBreath 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .harness-mark-pulse { animation: none; }
+  .pulse { animation: none; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--color-navy-deep); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, var(--color-electric-purple), var(--color-neon-orange));
+  border-radius: 4px;
+}
+

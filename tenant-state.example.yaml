@@ -1,0 +1,48 @@
+# Tenant + identity registry — TEMPLATE.
+# Copy to `tenant-state.yaml` and fill in YOUR values. The real `tenant-state.yaml`
+# is git-ignored so your tenant IDs never get published. Do NOT commit secrets.
+
+tenant:
+  id: 00000000-0000-0000-0000-000000000000        # your Entra tenant id
+  domain: example.org                              # your verified domain
+  displayName: Contoso
+  admin: admin@example.org                         # operator UPN
+  adminObjectId: 22222222-2222-2222-2222-222222222222
+
+subscription:
+  id: 11111111-1111-1111-1111-111111111111         # your Azure subscription id
+
+foundry:
+  accountName: <your-foundry-account>
+  resourceGroup: <your-resource-group>
+  region: eastus2
+  endpoint: https://<your-foundry-account>.cognitiveservices.azure.com/
+  deployments:
+    - name: gpt-4.1
+      boundTo: ForgedAgentOne
+    - name: gpt-5.1
+      boundTo: ForgedScholarTwo
+    - name: text-embedding-3-small
+      boundTo: customagentharness-kb-mcp
+
+# Entra app registrations created during setup (filled by you / the a365 CLI).
+entraApps:
+  - displayName: AgenticBank Hub (CustomAgentHarness)
+    purpose: MSAL.js SPA — end-user sign-in for /hub UI
+    appId: 44444444-4444-4444-4444-444444444444
+    objectId: 55555555-5555-5555-5555-555555555555
+    servicePrincipalId: 66666666-6666-6666-6666-666666666666
+    redirectUris:
+      - http://localhost:4001/hub
+      - http://localhost:4001
+    delegatedPermissions:
+      - User.Read
+    adminConsentGranted: false
+
+demoUsers:
+  oboEndUser:
+    upn: admin@example.org
+    objectId: 22222222-2222-2222-2222-222222222222
+
+# Filled in by `a365 setup blueprint` during provisioning.
+agentBlueprints: []

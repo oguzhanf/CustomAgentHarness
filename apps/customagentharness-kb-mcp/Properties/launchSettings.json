@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "customagentharness-kb-mcp": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:3981",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

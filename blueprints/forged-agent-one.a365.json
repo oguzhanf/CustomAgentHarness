@@ -1,0 +1,30 @@
+{
+  "$schema": "https://aka.ms/agent365-blueprint-schema/v1",
+  "displayName": "ForgedAgentOne",
+  "description": "AgenticBank relationship-manager copilot. Operates on behalf of the signed-in banker.",
+  "signInAudience": "AzureADMyOrg",
+  "owner": {
+    "userPrincipalName": "admin@example.org"
+  },
+  "sponsor": {
+    "userPrincipalName": "admin@example.org"
+  },
+  "tags": ["AgenticBank", "RelationshipManager", "OBO", "CustomAgentHarness"],
+  "requiredResourceAccess": [
+    {
+      "resourceAppId": "00000003-0000-0000-c000-000000000000",
+      "resourceAccess": [
+        { "id": "e1fe6dd8-ba31-4d61-89e7-88639da4683d", "type": "Scope" },
+        { "id": "570282fd-fa5c-430d-a7fd-fc8dc98a9dca", "type": "Scope" },
+        { "id": "465a38f9-76ea-45b9-9f34-9e8b0d4b0b42", "type": "Scope" },
+        { "id": "df85f4d6-205c-4ac5-a5ea-6bf408dba283", "type": "Scope" },
+        { "id": "205e70e5-aba6-4c52-a976-6d2d46c48043", "type": "Scope" }
+      ]
+    }
+  ],
+  "mcpServers": [
+    { "uniqueName": "mcp_MailTools",       "scope": "McpServers.Mail.All" },
+    { "uniqueName": "mcp_CalendarTools",   "scope": "McpServers.Calendar.All" },
+    { "uniqueName": "mcp_SharePointTools", "scope": "McpServers.SharePoint.All" }
+  ]
+}

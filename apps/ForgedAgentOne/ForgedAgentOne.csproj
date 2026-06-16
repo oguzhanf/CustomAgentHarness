@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <UserSecretsId>forged-agent-one-b842df34</UserSecretsId>
+    <RootNamespace>YourCustomAgentHarness.ForgedAgentOne</RootNamespace>
+    <AssemblyName>ForgedAgentOne</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SemanticKernel" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.AzureOpenAI" />
+    <PackageReference Include="Microsoft.OpenTelemetry" />
+    <PackageReference Include="Azure.Identity" Aliases="AzIdentity" />
+    <PackageReference Include="Microsoft.Identity.Web" />
+    <PackageReference Include="Microsoft.Identity.Web.TokenAcquisition" />
+    <PackageReference Include="Microsoft.Graph" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\shared\CustomAgentHarness.Shared\CustomAgentHarness.Shared.csproj" />
+  </ItemGroup>
+</Project>

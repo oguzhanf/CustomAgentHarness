@@ -1,0 +1,96 @@
+#
+# YourCustomAgentHarness Blueprint Manifest — harness-flavored
+# ForgedScholarTwo: application-permission agent with its own knowledge base.
+#
+apiVersion: customagentharness/v1
+kind: AgentBlueprint
+metadata:
+  id: forged-scholar-two
+  name: ForgedScholarTwo
+  version: 1.0.0
+  createdBy: admin@example.org
+
+identity:
+  displayName: ForgedScholarTwo
+  description: |
+    AgenticBank's policy & compliance scholar. Operates with its own application
+    identity (no user impersonation) and answers questions strictly from the
+    bank's vetted policy corpus (KYC, AML, lending, fraud, AI use, vendor risk,
+    business continuity). All retrieval is logged and Purview-gated.
+  tagline: Policy & compliance, on demand
+  category: KnowledgeAssistant
+  iconUri: /icons/forged-scholar-two.svg
+  publisher: YourCustomAgentHarness on behalf of AgenticBank
+
+ownership:
+  owner: admin@example.org
+  sponsor: admin@example.org
+  costCenter: AGB-COMPLIANCE-002
+  businessUnit: Risk & Compliance
+
+lifecycle:
+  status: Active
+  reviewCycleDays: 90
+  retireOn: null
+
+# Authentication / permission model
+authMode: s2s            # service-to-service (application)
+permissions:
+  delegated: []
+  application:
+    - resource: Microsoft Graph
+      roles:
+        - User.Read.All       # for "who is asking?" context only
+    - resource: YourCustomAgentHarness KB
+      roles:
+        - KB.Search.All       # custom role on the local KB MCP server
+
+# Model binding — heavier reasoning model for policy interpretation
+model:
+  provider: AzureOpenAI
+  endpoint: https://your-foundry-account.cognitiveservices.azure.com/
+  deploymentName: gpt-4.1
+  apiVersion: "2025-11-13"
+  temperature: 0.1
+  maxTokens: 4096
+
+# MCP tools — only the local harness KB
+mcpServers:
+  - id: harness_kb_agenticbank
+    scope: KB.Search.All
+    rationale: Retrieve and cite AgenticBank policy passages
+    endpoint: http://localhost:3981/mcp   # local MCP server in this harness
+
+# Embedding model for KB indexing
+retrieval:
+  provider: AzureOpenAI
+  embeddingDeployment: text-embedding-3-small
+  chunkTokens: 512
+  chunkOverlap: 64
+  topK: 6
+  similarityThreshold: 0.78
+
+observability:
+  exporters: [Agent365, Console, HarnessActivityConsole]
+  redactPiiInDev: true
+  sampleRate: 1.0
+
+contentProtection:
+  enabled: true
+  blockDirections: [user-to-agent, agent-to-user]
+  sensitiveInformationTypes:
+    - CreditCardNumber
+    - IBAN
+    - SWIFTCode
+    - InternalAccountNumber
+    - CustomerTaxId
+    - USSocialSecurityNumber
+    - EmailAddress
+  fallbackClassifier: regex
+
+hosting:
+  type: dotnet-aspnet
+  entryPoint: apps/ForgedScholarTwo/ForgedScholarTwo.csproj
+  listenPort: 3980
+  healthPath: /api/health
+  activityPath: /api/messages

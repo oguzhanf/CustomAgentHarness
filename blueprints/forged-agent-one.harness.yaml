@@ -1,0 +1,110 @@
+#
+# YourCustomAgentHarness Blueprint Manifest — harness-flavored
+# This is the *internal* representation the harness uses to describe an agent.
+# At provisioning time, `harness.tui` transforms this into the
+# Microsoft Agent 365 blueprint JSON expected by `a365 setup blueprint`.
+#
+# Mapping:
+#   Harness YAML field     -> Agent 365 blueprint JSON field
+#   ----------------       -> --------------------------------
+#   identity.displayName   -> displayName
+#   identity.description   -> description
+#   ownership.owner        -> owner.userPrincipalName
+#   ownership.sponsor      -> sponsor.userPrincipalName
+#   permissions.delegated  -> requiredResourceAccess[].resourceAccess (Scope)
+#   permissions.application-> requiredResourceAccess[].resourceAccess (Role)
+#   model.endpoint+name    -> appsettings.AIServices.AzureOpenAI
+#   mcpServers             -> ToolingManifest.json mcpServers[]
+#
+apiVersion: customagentharness/v1
+kind: AgentBlueprint
+metadata:
+  id: forged-agent-one
+  name: ForgedAgentOne
+  version: 1.0.0
+  createdBy: admin@example.org
+
+identity:
+  displayName: ForgedAgentOne
+  description: |
+    AgenticBank's relationship-manager copilot. Operates on behalf of the
+    signed-in banker to summarise mail, surface today's meetings, and locate
+    relevant SharePoint documents — always within the user's own access
+    boundary.
+  tagline: Your delegated banking copilot
+  category: ProductivityAssistant
+  iconUri: /icons/forged-agent-one.svg
+  publisher: YourCustomAgentHarness on behalf of AgenticBank
+
+ownership:
+  owner: admin@example.org
+  sponsor: admin@example.org
+  costCenter: AGB-DIGITAL-001
+  businessUnit: Digital Banking
+
+lifecycle:
+  status: Active
+  reviewCycleDays: 90
+  retireOn: null
+
+# Authentication / permission model
+authMode: obo            # on-behalf-of (delegated)
+permissions:
+  delegated:
+    - resource: Microsoft Graph
+      scopes:
+        - User.Read
+        - Mail.Read
+        - Calendars.Read
+        - Files.Read.All
+        - Sites.Read.All
+  application: []        # none — purely delegated
+
+# Model binding
+model:
+  provider: AzureOpenAI
+  endpoint: https://your-foundry-account.cognitiveservices.azure.com/
+  deploymentName: gpt-4.1
+  apiVersion: "2025-04-14"
+  temperature: 0.3
+  maxTokens: 2048
+
+# Governed Work IQ tools
+mcpServers:
+  - id: mcp_MailTools
+    scope: McpServers.Mail.All
+    rationale: Summarize unread mail for the signed-in banker
+  - id: mcp_CalendarTools
+    scope: McpServers.Calendar.All
+    rationale: List meetings on the banker's calendar
+  - id: mcp_SharePointTools
+    scope: McpServers.SharePoint.All
+    rationale: Locate policy / customer docs the banker has access to
+
+# Observability
+observability:
+  exporters: [Agent365, Console, HarnessActivityConsole]
+  redactPiiInDev: true
+  sampleRate: 1.0
+
+# Purview content protection
+contentProtection:
+  enabled: true
+  blockDirections: [user-to-agent, agent-to-user]
+  sensitiveInformationTypes:
+    - CreditCardNumber
+    - IBAN
+    - SWIFTCode
+    - InternalAccountNumber       # AgenticBank custom SIT
+    - CustomerTaxId
+    - USSocialSecurityNumber
+    - EmailAddress
+  fallbackClassifier: regex
+
+# How the harness runs the agent locally
+hosting:
+  type: dotnet-aspnet
+  entryPoint: apps/ForgedAgentOne/ForgedAgentOne.csproj
+  listenPort: 3979
+  healthPath: /api/health
+  activityPath: /api/messages

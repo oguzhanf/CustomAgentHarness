@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <UserSecretsId>forged-scholar-two-c953ef45</UserSecretsId>
+    <RootNamespace>YourCustomAgentHarness.ForgedScholarTwo</RootNamespace>
+    <AssemblyName>ForgedScholarTwo</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SemanticKernel" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.AzureOpenAI" />
+    <PackageReference Include="Microsoft.OpenTelemetry" />
+    <PackageReference Include="Azure.Identity" Aliases="AzIdentity" />
+    <PackageReference Include="ModelContextProtocol" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\shared\CustomAgentHarness.Shared\CustomAgentHarness.Shared.csproj" />
+  </ItemGroup>
+</Project>

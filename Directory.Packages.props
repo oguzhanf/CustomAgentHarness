@@ -1,0 +1,51 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Microsoft Agent 365 SDK -->
+    <PackageVersion Include="Microsoft.Agents.A365.Notifications" Version="1.1.9-preview" />
+    <PackageVersion Include="Microsoft.Agents.A365.Tooling.Extensions.SemanticKernel" Version="1.1.9-preview" />
+    <PackageVersion Include="Microsoft.OpenTelemetry" Version="1.0.1" />
+
+    <!-- Microsoft 365 Agents SDK (Bot Framework next-gen hosting) -->
+    <PackageVersion Include="Microsoft.Agents.Hosting.AspNetCore" Version="1.4.82-beta" />
+    <PackageVersion Include="Microsoft.Agents.Authentication.Msal" Version="1.4.82-beta" />
+
+    <!-- Semantic Kernel -->
+    <PackageVersion Include="Microsoft.SemanticKernel" Version="1.71.0" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Agents.Core" Version="1.71.0" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Connectors.AzureOpenAI" Version="1.71.0" />
+
+    <!-- MCP -->
+    <PackageVersion Include="ModelContextProtocol" Version="0.3.0-preview.4" />
+    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="0.3.0-preview.4" />
+    <PackageVersion Include="ModelContextProtocol.Core" Version="0.3.0-preview.4" />
+
+    <!-- Auth & Graph -->
+    <PackageVersion Include="Azure.Identity" Version="1.17.1" />
+    <PackageVersion Include="Microsoft.Identity.Web" Version="3.13.0" />
+    <PackageVersion Include="Microsoft.Identity.Web.TokenAcquisition" Version="3.13.0" />
+    <PackageVersion Include="Microsoft.Graph" Version="5.84.0" />
+
+    <!-- OpenTelemetry direct (companion to Microsoft.OpenTelemetry) -->
+    <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.16.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.16.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.16.0" />
+
+    <!-- TUI -->
+    <PackageVersion Include="Spectre.Console" Version="0.49.1" />
+    <PackageVersion Include="Spectre.Console.Cli" Version="0.49.1" />
+    <PackageVersion Include="Spectre.Console.Json" Version="0.49.1" />
+
+    <!-- Utilities -->
+    <PackageVersion Include="YamlDotNet" Version="16.2.1" />
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.2.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="10.0.1-preview.1.25571.5" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.3" />
+    <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
+  </ItemGroup>
+</Project>

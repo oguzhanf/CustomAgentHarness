@@ -183,6 +183,7 @@ agent registration; and an AI-app-scoped DLP policy for live Purview enforcement
 ### Orchestrator (the `harness` TUI)
 | Command | What it does |
 |---|---|
+| `dotnet run --project apps/harness.tui -- setup` | **One-stop guided setup** — prerequisites (with installs), `.env` config, Entra roles, provisioning, Purview DLP. Idempotent; `--only`/`--skip <steps>`, `--yes` for non-interactive. |
 | `dotnet run --project apps/harness.tui -- up` | Start **all** services (api, web, kb-mcp, both agents) and wait for health. Idempotent. |
 | `dotnet run --project apps/harness.tui -- up --only ForgedAgentOne` | Start only the named service(s). |
 | `dotnet run --project apps/harness.tui -- status` | Port + PID + health table; prints the active tenant. |
@@ -231,6 +232,16 @@ set `AZURE_OPENAI_API_KEY` (or `az login` to a reachable Foundry) in `.env`. The
 ---
 
 ## Full setup — LIVE (your tenant)
+
+> **Fastest path — one command does it all (interactive & idempotent):**
+> ```bash
+> az login
+> dotnet run --project apps/harness.tui -- setup
+> ```
+> `harness setup` walks every step below in order: checks/installs prerequisites, writes `.env`
+> (auto-detecting tenant/subscription/UPN from your `az` session), ensures your Entra roles, provisions
+> the blueprints + agent identities, and creates the Purview DLP policy. Re-run any step with
+> `--only roles,provision`. The manual equivalents are below if you prefer to run them piecemeal.
 
 ```bash
 # 1. Sign in + configure

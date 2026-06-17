@@ -33,9 +33,14 @@ public static class DotEnv
             var key = line[..eq].Trim();
             var value = line[(eq + 1)..].Trim();
 
-            // strip an inline comment that is not inside quotes
-            if (value.Length > 0 && value[0] != '"' && value[0] != '\'')
+            // A value that is only an inline comment (e.g. `KEY=   # hint` from .env.example) is EMPTY.
+            if (value.StartsWith('#'))
             {
+                value = "";
+            }
+            else if (value.Length > 0 && value[0] != '"' && value[0] != '\'')
+            {
+                // strip a trailing inline comment that is not inside quotes
                 var hash = value.IndexOf(" #", StringComparison.Ordinal);
                 if (hash >= 0) value = value[..hash].Trim();
             }

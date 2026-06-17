@@ -10,6 +10,8 @@ app.Configure(c =>
 {
     c.SetApplicationName("harness");
     c.SetApplicationVersion("1.0.0");
+    c.AddCommand<SetupCommand>("setup")
+        .WithDescription("One-stop guided setup: prerequisites, .env config, Entra roles, provisioning, Purview DLP.");
     c.AddCommand<UpCommand>("up")
         .WithDescription("Start every service the harness owns (api, web, kb-mcp, both agents).");
     c.AddCommand<DownCommand>("down")
@@ -30,13 +32,14 @@ if (args.Length == 0)
     AnsiConsole.MarkupLine("  [grey78]agent-365 integration plane[/]");
     AnsiConsole.WriteLine();
     AnsiConsole.MarkupLine("  Commands:");
+    AnsiConsole.MarkupLine("    [bold]harness setup[/]    — one-stop: prerequisites, .env, roles, provisioning, Purview");
     AnsiConsole.MarkupLine("    [bold]harness up[/]       — start every service (api, web, kb-mcp, agents)");
     AnsiConsole.MarkupLine("    [bold]harness down[/]     — stop every harness-managed service");
     AnsiConsole.MarkupLine("    [bold]harness status[/]   — port + process table for every service");
     AnsiConsole.MarkupLine("    [bold]harness doctor[/]   — preflight checks (az, a365, Foundry, Purview)");
     AnsiConsole.MarkupLine("    [bold]harness demo[/]     — drive the 5-chapter workshop walkthrough");
     AnsiConsole.WriteLine();
-    AnsiConsole.MarkupLine("  Try [yellow]harness doctor[/] to verify everything before the workshop.");
+    AnsiConsole.MarkupLine("  New here? Run [yellow]harness setup[/] first, then [yellow]harness up[/].");
     return 0;
 }
 

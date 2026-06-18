@@ -1,6 +1,6 @@
 # YourCustomAgentHarness
 
-![.NET 9](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet&logoColor=white)
+![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)
 ![Next.js 16](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
 ![Semantic Kernel](https://img.shields.io/badge/Semantic%20Kernel-agents-0078D4)
 ![Agent 365](https://img.shields.io/badge/Microsoft%20Agent%20365-preview-FF8C00)
@@ -32,6 +32,20 @@ agent-governance stack — **Agent 365**, **Entra Agent ID**, **Purview**, and *
 ---
 
 ## Get started
+
+From a fresh clone, **one script installs every prerequisite, builds, and runs the guided setup**:
+
+```powershell
+./setup.ps1
+```
+
+> [!NOTE]
+> `setup.ps1` installs (via winget, if missing) **Git, the .NET 10 SDK, Azure CLI, Node.js, PowerShell 7**,
+> the **`a365` CLI** and the **ExchangeOnlineManagement** module — then builds and runs `harness setup`.
+> It can be started from Windows PowerShell 5.1: it installs PowerShell 7 and **re-launches itself** under it.
+> Flags: `-SkipProvision` (install + build only), `-SkipInstall`, `-Yes` (non-interactive).
+
+Already have the toolchain? Skip straight to the tenant flow:
 
 ```bash
 az login
@@ -65,6 +79,7 @@ dotnet run --project apps/harness.tui -- up      # start everything, then open h
 ## What's in the repo
 
 ```
+setup.ps1                      one-command bootstrap: installs prereqs, builds, runs harness setup
 apps/
   harness.tui/                 the `harness` CLI: setup / up / down / status / doctor / demo
   harness.api/                 control-plane API + SSE event stream            (:4000)
@@ -92,8 +107,8 @@ tenant-state.example.yaml      optional YAML alternative to .env
 Run one service with `dotnet run --project apps/<name>`; the web UI with `cd apps/harness.web && npm install && npm run dev`.
 The provisioning scripts under `workshop/scripts/` can also be run directly (PowerShell 7).
 
-**Prerequisites:** .NET 9 - Azure CLI - PowerShell 7 - Node 20+ (web UI) - the `a365` CLI and
-`ExchangeOnlineManagement` for live provisioning (`harness setup` checks and installs these).
+**Prerequisites:** all installed by `./setup.ps1` — Git, the **.NET 10 SDK**, Azure CLI, PowerShell 7,
+Node 20+ (web UI), the `a365` CLI and `ExchangeOnlineManagement`. Run it once, or install them yourself.
 
 ---
 

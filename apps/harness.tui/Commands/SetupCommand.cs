@@ -53,9 +53,14 @@ public sealed class SetupCommand : AsyncCommand<SetupCommand.Settings>
         if (Want("roles"))     results.Add(("entra roles",     await StepScriptAsync(con, s,
             "grant-agent-roles.ps1", new[] { "-IncludePurview" },
             "Ensure the signed-in operator holds Agent ID + Agent Registry (+ Compliance) roles?")));
-        if (Want("provision")) results.Add(("provision agents", await StepScriptAsync(con, s,
-            "provision-agents.ps1", Array.Empty<string>(),
-            "Create blueprints + mint agent identities via the a365 CLI? (an interactive sign-in may appear)")));
+        if (Want("provision"))
+        {
+            var pr = await StepScriptAsync(con, s, "provision-agents.ps1", Array.Empty<string>(),
+                "Create blueprints + mint agent identities via the a365 CLI? (an interactive sign-in may appear)");
+            results.Add(("provision agents", pr));
+            if (pr.Outcome is Outcome.Ok or Outcome.Warn)
+                await AutoFillAppIdsAsync(con, Path.Combine(HarnessPaths.RepoRoot, ".env"));
+        }
         if (Want("purview"))   results.Add(("purview dlp",     await StepScriptAsync(con, s,
             "create-purview-policies.ps1", Array.Empty<string>(),
             "Create the AI-app-scoped Purview DLP policy? (interactive Connect-IPPSSession sign-in)")));
@@ -174,24 +179,28 @@ public sealed class SetupCommand : AsyncCommand<SetupCommand.Settings>
         var tenantDefault = ok ? TryJson(acct, "tenantId") : null;
         var upnDefault = ok ? TryJson(acct, "user", "name") : null;
         var subDefault = ok ? TryJson(acct, "id") : null;
+        var (foundryAcct, foundryRg, foundryEndpoint) = await DetectFoundryAsync();
 
         if (s.Yes)
         {
-            // Non-interactive: only fill what we can detect, leave the rest for the user.
+            // Non-interactive: fill everything we can detect from az; leave the rest for provisioning.
             if (tenantDefault != null) SetEnvKey(envPath, "TENANT_ID", tenantDefault, onlyIfEmpty: true);
             if (upnDefault != null) SetEnvKey(envPath, "ADMIN_UPN", upnDefault, onlyIfEmpty: true);
             if (subDefault != null) SetEnvKey(envPath, "SUBSCRIPTION_ID", subDefault, onlyIfEmpty: true);
-            return new StepResult(Outcome.Ok, "auto-filled tenant/admin/subscription from az (where empty).");
+            if (foundryAcct != null) SetEnvKey(envPath, "FOUNDRY_ACCOUNT", foundryAcct, onlyIfEmpty: true);
+            if (foundryRg != null) SetEnvKey(envPath, "FOUNDRY_RESOURCE_GROUP", foundryRg, onlyIfEmpty: true);
+            if (foundryEndpoint != null) SetEnvKey(envPath, "FOUNDRY_ENDPOINT", foundryEndpoint, onlyIfEmpty: true);
+            return new StepResult(Outcome.Ok, $"auto-filled tenant/subscription/foundry from az (foundry={(foundryAcct ?? "not found")}).");
         }
 
-        con.MarkupLine($"[{Theme.Steel}]Press Enter to keep the shown default / current value.[/]");
+        con.MarkupLine($"[{Theme.Steel}]Press Enter to keep the shown (auto-detected) value.[/]");
         Ask(con, envPath, "TENANT_ID", "Entra tenant id", tenantDefault);
         Ask(con, envPath, "ADMIN_UPN", "Operator / blueprint-owner UPN", upnDefault);
         Ask(con, envPath, "SUBSCRIPTION_ID", "Azure subscription id", subDefault);
-        Ask(con, envPath, "FOUNDRY_ACCOUNT", "Foundry / AI Services account name", null);
-        Ask(con, envPath, "FOUNDRY_RESOURCE_GROUP", "Foundry resource group", null);
-        Ask(con, envPath, "FOUNDRY_ENDPOINT", "Foundry endpoint (https://<acct>.cognitiveservices.azure.com/)", null);
-        con.MarkupLine($"[{Theme.Acid}]Saved[/] to {envPath.EscapeMarkup()}. (App ids are filled after provisioning.)");
+        Ask(con, envPath, "FOUNDRY_ACCOUNT", "Foundry / AI Services account name", foundryAcct);
+        Ask(con, envPath, "FOUNDRY_RESOURCE_GROUP", "Foundry resource group", foundryRg);
+        Ask(con, envPath, "FOUNDRY_ENDPOINT", "Foundry endpoint", foundryEndpoint);
+        con.MarkupLine($"[{Theme.Acid}]Saved[/] {envPath.EscapeMarkup()}. (Agent app ids are auto-filled after provisioning.)");
         return new StepResult(Outcome.Ok, "configured");
     }
 
@@ -216,6 +225,72 @@ public sealed class SetupCommand : AsyncCommand<SetupCommand.Settings>
     }
 
     // ── helpers ─────────────────────────────────────────────────────────────
+    /// <summary>Find a Foundry / Azure AI Services account in the current subscription via az.</summary>
+    private static async Task<(string? account, string? rg, string? endpoint)> DetectFoundryAsync()
+    {
+        var az = Probes.ResolveAz();
+        var (ok, json, _) = await Probes.RunAsync(az, new[] { "cognitiveservices", "account", "list", "--output", "json" }, TimeSpan.FromSeconds(45), default);
+        if (!ok) return (null, null, null);
+        try
+        {
+            var start = json.IndexOf('[');
+            if (start > 0) json = json[start..];
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            if (doc.RootElement.ValueKind != System.Text.Json.JsonValueKind.Array) return (null, null, null);
+            // Prefer AIServices, then OpenAI; otherwise take the first account.
+            foreach (var wanted in new[] { "AIServices", "OpenAI", null })
+            {
+                foreach (var a in doc.RootElement.EnumerateArray())
+                {
+                    var kind = a.TryGetProperty("kind", out var k) ? k.GetString() : null;
+                    if (wanted != null && !string.Equals(kind, wanted, StringComparison.OrdinalIgnoreCase)) continue;
+                    var name = a.TryGetProperty("name", out var n) ? n.GetString() : null;
+                    string? endpoint = a.TryGetProperty("properties", out var p) && p.TryGetProperty("endpoint", out var e) ? e.GetString() : null;
+                    string? rg = null;
+                    if (a.TryGetProperty("resourceGroup", out var rgEl)) rg = rgEl.GetString();
+                    else if (a.TryGetProperty("id", out var idEl))
+                    {
+                        var m = System.Text.RegularExpressions.Regex.Match(idEl.GetString() ?? "", "/resourceGroups/([^/]+)/", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                        if (m.Success) rg = m.Groups[1].Value;
+                    }
+                    if (endpoint == null && name != null) endpoint = $"https://{name}.cognitiveservices.azure.com/";
+                    return (name, rg, endpoint);
+                }
+            }
+        }
+        catch { }
+        return (null, null, null);
+    }
+
+    /// <summary>After provisioning, look up each agent's Entra blueprint app id and write it into .env.</summary>
+    private static async Task AutoFillAppIdsAsync(IAnsiConsole con, string envPath)
+    {
+        if (!File.Exists(envPath)) return;
+        var az = Probes.ResolveAz();
+        var map = new (string env, string display)[]
+        {
+            ("FORGEDAGENTONE_APP_ID",   "ForgedAgentOne Blueprint"),
+            ("FORGEDSCHOLARTWO_APP_ID", "ForgedScholarTwo Blueprint"),
+            ("HUB_APP_ID",              "AgenticBank Hub (CustomAgentHarness)"),
+        };
+        var any = false;
+        foreach (var (env, display) in map)
+        {
+            if (!string.IsNullOrWhiteSpace(GetEnvKey(envPath, env))) continue;
+            var (ok, outp, _) = await Probes.RunAsync(az,
+                new[] { "ad", "app", "list", "--filter", $"displayName eq '{display}'", "--query", "[0].appId", "-o", "tsv" },
+                TimeSpan.FromSeconds(20), default);
+            var appId = ok ? outp.Trim() : "";
+            if (!string.IsNullOrWhiteSpace(appId) && !appId.Equals("null", StringComparison.OrdinalIgnoreCase))
+            {
+                SetEnvKey(envPath, env, appId, onlyIfEmpty: true);
+                con.MarkupLine($"[{Theme.Acid}].env[/] {env} = {appId.EscapeMarkup()}");
+                any = true;
+            }
+        }
+        if (any) con.MarkupLine($"[{Theme.Steel}]Wrote provisioned app ids into .env.[/]");
+    }
+
     private static HashSet<string> Parse(string? csv) =>
         (csv ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
         .ToHashSet(StringComparer.OrdinalIgnoreCase);
